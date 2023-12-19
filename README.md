@@ -1,4 +1,8 @@
-# GraphQL and Graph*i*QL Spring Framework Boot Starters
+> [!WARNING]
+> ## THIS REPOSITORY HAS BEEN ARCHIVED AND IS NO LONGER BEING MAINTAINED
+> Since Spring now officially supports GraphQL we have decided to archive this project. We encourage you to start using [Spring for GraphQL](https://spring.io/projects/spring-graphql) instead. If you're projects rely on this library and you really require an update and cannot migrate to Spring for GraphQL yet, then you should fork this repository and make the necessary changes on your own.
+
+# GraphQL Spring Boot Starters
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.graphql-java-kickstart/graphql-spring-boot-starter.svg)](https://maven-badges.herokuapp.com/maven-central/com.graphql-java-kickstart/graphql-spring-boot-starter)
 [![Sonatype Snapshot](https://img.shields.io/nexus/s/com.graphql-java-kickstart/graphql-spring-boot-starter?server=https%3A%2F%2Foss.sonatype.org)](#snapshots)
@@ -7,24 +11,16 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/graphql-java-kickstart/graphql-spring-boot)](https://github.com/graphql-java-kickstart/graphql-spring-boot/graphs/contributors)
 [![Discuss on GitHub](https://img.shields.io/badge/GitHub-discuss-orange)](https://github.com/graphql-java-kickstart/graphql-spring-boot/discussions)
 
-#### We are looking for contributors!
-
-Are you interested in improving our documentation, working on the codebase, reviewing PRs?
-
-[Reach out to us on Discussions](https://github.com/graphql-java-kickstart/graphql-spring-boot/discussions)
-and join the team!
-
-
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Quick start](#quick-start)
-  - [Using Gradle](#using-gradle)
-  - [Using Maven](#using-maven)
-- [Documentation](#documentation)
-- [Requirements and Downloads](#requirements-and-downloads)
-  - [Snapshots](#snapshots)
+  - [Quick start](#quick-start)
+    - [Using Gradle](#using-gradle)
+    - [Using Maven](#using-maven)
+  - [Documentation](#documentation)
+  - [Requirements and Downloads](#requirements-and-downloads)
+    - [Snapshots](#snapshots)
 - [Enable GraphQL Servlet](#enable-graphql-servlet)
 - [Enable Graph*i*QL](#enable-graphiql)
 - [Enable Altair](#enable-altair)
@@ -35,8 +31,8 @@ and join the team!
   - [Customizing GraphQL Playground](#customizing-graphql-playground)
   - [Tabs](#tabs)
 - [Enable GraphQL Voyager](#enable-graphql-voyager)
-  - [Basic settings](#graphql-voyager-basic-settings)
-  - [CDN](#graphql-voyager-cdn)
+  - [GraphQL Voyager Basic settings](#graphql-voyager-basic-settings)
+  - [GraphQL Voyager CDN](#graphql-voyager-cdn)
   - [Customizing GraphQL Voyager](#customizing-graphql-voyager)
 - [Supported GraphQL-Java Libraries](#supported-graphql-java-libraries)
   - [GraphQL Java Tools](#graphql-java-tools)
@@ -47,11 +43,11 @@ and join the team!
     - [Custom scalars and type functions](#custom-scalars-and-type-functions)
     - [Custom Relay and GraphQL Annotation Processor](#custom-relay-and-graphql-annotation-processor)
   - [Extended scalars](#extended-scalars)
+  - [Aliased scalars](#aliased-scalars)
 - [Tracing and Metrics](#tracing-and-metrics)
   - [Usage](#usage)
-- [FAQs](#faqs)
-  - [WARNING: NoClassDefFoundError when using GraphQL Java Tools > 5.4.x](#warning-noclassdeffounderror-when-using-graphql-java-tools--54x)
-
+  - [FAQs](#faqs)
+    - [WARNING: NoClassDefFoundError when using GraphQL Java Tools > 5.4.x](#warning-noclassdeffounderror-when-using-graphql-java-tools--54x)
 - [Contributions](#contributions)
 - [Licenses](#licenses)
 
@@ -97,10 +93,10 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:12.0.0'
+  implementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:14.0.0'
   
   // testing facilities
-  testImplementation 'com.graphql-java-kickstart:graphql-spring-boot-starter-test:12.0.0'
+  testImplementation 'com.graphql-java-kickstart:graphql-spring-boot-starter-test:14.0.0'
 }
 ```
 
@@ -110,14 +106,14 @@ Maven:
 <dependency>
   <groupId>com.graphql-java-kickstart</groupId>
   <artifactId>graphql-spring-boot-starter</artifactId>
-  <version>12.0.0</version>
+  <version>14.0.0</version>
 </dependency>
 
 <!-- testing facilities -->
 <dependency>
 <groupId>com.graphql-java-kickstart</groupId>
 <artifactId>graphql-spring-boot-starter-test</artifactId>
-<version>12.0.0</version>
+<version>14.0.0</version>
 <scope>test</scope>
 </dependency>
 
@@ -193,29 +189,30 @@ Available Spring Boot configuration parameters (either `application.yml`
 or `application.properties`):
 
 ```yaml
-graphiql:
-  mapping: /graphiql
-  endpoint:
-    graphql: /graphql
-    subscriptions: /subscriptions
-  subscriptions:
-    timeout: 30
-    reconnect: false
-  basePath: /
-  enabled: true
-  pageTitle: GraphiQL
-  cdn:
-    enabled: false
-    version: latest
-  props:
-    resources:
-      query: query.graphql
-      defaultQuery: defaultQuery.graphql
-      variables: variables.graphql
-    variables:
-      editorTheme: "solarized light"
-  headers:
-    Authorization: "Bearer <your-token>"
+graphql:
+  graphiql:
+    mapping: /graphiql
+    endpoint:
+      graphql: /graphql
+      subscriptions: /subscriptions
+    subscriptions:
+      timeout: 30
+      reconnect: false
+    basePath: /
+    enabled: true
+    pageTitle: GraphiQL
+    cdn:
+      enabled: false
+      version: latest
+    props:
+      resources:
+        query: query.graphql
+        defaultQuery: defaultQuery.graphql
+        variables: variables.json
+      variables:
+        editorTheme: "solarized light"
+    headers:
+      Authorization: "Bearer <your-token>"
 ```
 
 By default GraphiQL is served from within the package. This can be configured to be served from CDN
@@ -239,30 +236,31 @@ Available Spring Boot configuration parameters (either `application.yml`
 or `application.properties`):
 
 ```yaml
-altair:
-  enabled: true
-  mapping: /altair
-  subscriptions:
-    timeout: 30
-    reconnect: false
-  static:
-    base-path: /
-  page-title: Altair
-  cdn:
-    enabled: false
-    version: 4.0.2
-  options:
-    endpoint-url: /graphql
-    subscriptions-endpoint: /subscriptions
-    initial-settings:
-      theme: dracula
-    initial-headers:
-      Authorization: "Bearer <your-token>"
-  resources:
-    initial-query: defaultQuery.graphql
-    initial-variables: variables.graphql
-    initial-pre-request-script: pre-request.graphql
-    initial-post-request-script: post-request.graphql
+graphql:
+  altair:
+    enabled: true
+    mapping: /altair
+    subscriptions:
+      timeout: 30
+      reconnect: false
+    static:
+      base-path: /
+    page-title: Altair
+    cdn:
+      enabled: false
+      version: 4.0.2
+    options:
+      endpoint-url: /graphql
+      subscriptions-endpoint: /subscriptions
+      initial-settings:
+        theme: dracula
+      initial-headers:
+        Authorization: "Bearer <your-token>"
+    resources:
+      initial-query: defaultQuery.graphql
+      initial-variables: variables.graphql
+      initial-pre-request-script: pre-request.graphql
+      initial-post-request-script: post-request.graphql
 ```
 
 By default Altair is served from within the package. This can be configured to be served from CDN
@@ -286,43 +284,44 @@ Available Spring Boot configuration parameters (either `application.yml`
 or `application.properties`):
 
 ```yaml
-graphql.playground:
-  mapping: /playground
-  endpoint: /graphql
-  subscriptionEndpoint: /subscriptions
-  staticPath.base: my-playground-resources-folder
-  enabled: true
-  pageTitle: Playground
-  cdn:
-    enabled: false
-    version: latest
-  settings:
-    editor.cursorShape: line
-    editor.fontFamily: "'Source Code Pro', 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace"
-    editor.fontSize: 14
-    editor.reuseHeaders: true
-    editor.theme: dark
-    general.betaUpdates: false
-    prettier.printWidth: 80
-    prettier.tabWidth: 2
-    prettier.useTabs: false
-    request.credentials: omit
-    schema.polling.enable: true
-    schema.polling.endpointFilter: "*localhost*"
-    schema.polling.interval: 2000
-    schema.disableComments: true
-    tracing.hideTracingResponse: true
-  headers:
-    headerFor: AllTabs
-  tabs:
-    - name: Example Tab
-      query: classpath:exampleQuery.graphql
-      headers:
-        SomeHeader: Some value
-      variables: classpath:variables.json
-      responses:
-        - classpath:exampleResponse1.json
-        - classpath:exampleResponse2.json
+graphql:
+  playground:
+    mapping: /playground
+    endpoint: /graphql
+    subscriptionEndpoint: /subscriptions
+    staticPath.base: my-playground-resources-folder
+    enabled: true
+    pageTitle: Playground
+    cdn:
+      enabled: false
+      version: latest
+    settings:
+      editor.cursorShape: line
+      editor.fontFamily: "'Source Code Pro', 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace"
+      editor.fontSize: 14
+      editor.reuseHeaders: true
+      editor.theme: dark
+      general.betaUpdates: false
+      prettier.printWidth: 80
+      prettier.tabWidth: 2
+      prettier.useTabs: false
+      request.credentials: omit
+      schema.polling.enable: true
+      schema.polling.endpointFilter: "*localhost*"
+      schema.polling.interval: 2000
+      schema.disableComments: true
+      tracing.hideTracingResponse: true
+    headers:
+      headerFor: AllTabs
+    tabs:
+      - name: Example Tab
+        query: classpath:exampleQuery.graphql
+        headers:
+          SomeHeader: Some value
+        variables: classpath:variables.json
+        responses:
+          - classpath:exampleResponse1.json
+          - classpath:exampleResponse2.json
 ```
 
 ## Basic settings
@@ -388,24 +387,25 @@ Available Spring Boot configuration parameters (either `application.yml`
 or `application.properties`):
 
 ```yaml
-voyager:
-  enabled: true
-  basePath: /
-  mapping: /voyager
-  endpoint: /graphql
-  cdn:
-    enabled: false
-    version: latest
-  pageTitle: Voyager
-  displayOptions:
-    skipRelay: true
-    skipDeprecated: true
-    rootType: Query
-    sortByAlphabet: false
-    showLeafFields: true
-    hideRoot: false
-  hideDocs: false
-  hideSettings: false
+graphql:
+  voyager:
+    enabled: true
+    basePath: /
+    mapping: /voyager
+    endpoint: /graphql
+    cdn:
+      enabled: false
+      version: latest
+    pageTitle: Voyager
+    displayOptions:
+      skipRelay: true
+      skipDeprecated: true
+      rootType: Query
+      sortByAlphabet: false
+      showLeafFields: true
+      hideRoot: false
+    hideDocs: false
+    hideSettings: false
 ```
 
 ## GraphQL Voyager Basic settings
@@ -543,11 +543,10 @@ graphql:
   extended-scalars: BigDecimal, Date
 ```
 
-The available scalars are the following: `BigDecimal`, `BigInteger`, `Byte`, `Char`, `Date`
-, `DateTime`, `JSON`,
-`Locale`, `Long`, `NegativeFloat`, `NegativeInt`, `NonNegativeFloat`, `NonNegativeInt`
-, `NonPositiveFloat`,
-`NonPositiveInt`, `Object`, `PositiveFloat`, `PositiveInt`, `Short`, `Time`, `Url`.
+The available scalars are the following: `BigDecimal`, `BigInteger`, `Byte`, `Char`, `Date`, 
+`DateTime`, `JSON`, `LocalTime` *(since 13.0.0)*, `Locale`, `Long`, `NegativeFloat`, `NegativeInt`,
+`NonNegativeFloat`, `NonNegativeInt`, `NonPositiveFloat`,`NonPositiveInt`, `Object`, `PositiveFloat`,
+`PositiveInt`, `Short`, `Time`, `UUID` *(since 13.0.0)*, `Url`.
 
 This setting works with both the [GraphQL Java Tools](#graphql-java-tools) and the
 [GraphQL Annotations](#graphql-annotations) integration.
@@ -559,6 +558,34 @@ declared in the GraphQL Schema:
 scalar BigDecimal
 scalar Date
 ```
+
+## Aliased scalars
+
+*Requires version 13.0.0 or greater*
+
+The starter also supports [aliased scalars](https://github.com/graphql-java/graphql-java-extended-scalars#alias-scalars).
+You can define aliases for any standard or extended scalar, as shown in the example below. Note that
+ the original extended scalar (`BigDecimal`) will *not* be available.  You have to use 
+`graphql.extended-scalars` property to declare it.
+
+```yaml
+graphql:
+  aliased-scalars:
+    BigDecimal: Number, Decimal
+    String: Text
+```
+
+When using the [GraphQL Java Tools](#graphql-java-tools) integration, the aliased scalars must also be
+declared in the GraphQL Schema:
+
+```graphql
+scalar Number
+scalar Decimal
+scalar Text
+```
+
+**Note**: *Custom scalar beans cannot be aliased this way. If you need to alias them, you have to
+manually declare the aliased scalar bean.*
 
 # Tracing and Metrics
 

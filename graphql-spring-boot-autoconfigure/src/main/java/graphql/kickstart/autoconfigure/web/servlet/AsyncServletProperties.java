@@ -12,7 +12,7 @@ public class AsyncServletProperties {
 
   public static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
 
-  private boolean enabled = true;
+  private boolean enabled = false;
   /**
    * Asynchronous execution timeout. If a duration suffix is not specified, millisecond will be used.
    */
@@ -22,7 +22,7 @@ public class AsyncServletProperties {
   private Threads threads = new Threads();
 
   @Data
-  static class Threads {
+  public static class Threads {
     private int min = 10;
     private int max = 200;
     private String namePrefix = "graphql-exec-";

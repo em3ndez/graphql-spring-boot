@@ -3,7 +3,7 @@ package graphql.kickstart.autoconfigure.web.servlet.test.extendedscalars;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import graphql.kickstart.autoconfigure.web.servlet.GraphQLExtendedScalarsInitializer;
+import graphql.kickstart.autoconfigure.scalars.GraphQLExtendedScalarsInitializer;
 import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLScalarType;
 import java.util.AbstractMap;
@@ -30,10 +30,7 @@ class ExtendedScalarsTest {
     assertThatExceptionOfType(ApplicationContextException.class)
         .isThrownBy(application::run)
         .withMessage(
-            "Invalid extended scalar name(s) found: BadDecimal, Datee. Valid names are: BigDecimal, "
-                + "BigInteger, Byte, Char, Date, DateTime, JSON, Locale, Long, NegativeFloat, NegativeInt, "
-                + "NonNegativeFloat, NonNegativeInt, NonPositiveFloat, NonPositiveInt, Object, PositiveFloat, "
-                + "PositiveInt, Short, Time, Url.");
+            "Invalid extended scalar name(s) found: BadDecimal, Datee. Valid names are: BigDecimal, BigInteger, Byte, Char, CountryCode, Currency, Date, DateTime, JSON, LocalTime, Locale, Long, NegativeFloat, NegativeInt, NonNegativeFloat, NonNegativeInt, NonPositiveFloat, NonPositiveInt, Object, PositiveFloat, PositiveInt, Short, Time, UUID, Url.");
   }
 
   @Test

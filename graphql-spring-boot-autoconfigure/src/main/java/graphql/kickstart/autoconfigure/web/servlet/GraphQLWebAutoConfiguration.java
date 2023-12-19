@@ -57,23 +57,24 @@ import graphql.kickstart.servlet.input.GraphQLInvocationInputFactory;
 import graphql.kickstart.spring.error.ErrorHandlerSupplier;
 import graphql.kickstart.spring.error.GraphQLErrorStartupListener;
 import graphql.schema.GraphQLSchema;
+import jakarta.servlet.MultipartConfigElement;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import javax.servlet.MultipartConfigElement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -95,9 +96,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.util.UrlPathHelper;
 
 /** @author <a href="mailto:java.lang.RuntimeException@gmail.com">oEmbedler Inc.</a> */
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
-@Configuration
+@AutoConfiguration
 @RequiredArgsConstructor
 @Import(GraphQLInvokerAutoConfiguration.class)
 @ConditionalOnWebApplication(type = Type.SERVLET)
@@ -290,7 +290,8 @@ public class GraphQLWebAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   @ConditionalOnProperty(
-      value = "graphql.servlet.use-default-objectmapper",
+      prefix = "graphql.servlet",
+      name = "use-default-objectmapper",
       havingValue = "true",
       matchIfMissing = true)
   public ObjectMapperProvider objectMapperProvider(ObjectMapper objectMapper) {
@@ -314,10 +315,6 @@ public class GraphQLWebAutoConfiguration {
     Duration asyncTimeout =
         Optional.ofNullable(asyncServletProperties.getTimeout()) //
             .orElse(AsyncServletProperties.DEFAULT_TIMEOUT);
-    long asyncTimeoutMilliseconds =
-        Optional.ofNullable(graphQLServletProperties.getAsyncTimeout()) //
-            .orElse(asyncTimeout)
-            .toMillis();
     long subscriptionTimeoutMilliseconds =
         Optional.ofNullable(graphQLServletProperties.getSubscriptionTimeout()) //
             .orElse(GraphQLServletProperties.DEFAULT_SUBSCRIPTION_TIMEOUT)
@@ -330,7 +327,7 @@ public class GraphQLWebAutoConfiguration {
         .with(batchInputPreProcessor)
         .with(graphQLServletProperties.getContextSetting())
         .with(responseCacheManager)
-        .asyncTimeout(asyncTimeoutMilliseconds)
+        .asyncTimeout(asyncTimeout.toMillis())
         .with(asyncTaskDecorator)
         .asyncCorePoolSize(asyncServletProperties.getThreads().getMin())
         .asyncMaxPoolSize(asyncServletProperties.getThreads().getMax())
@@ -340,22 +337,14 @@ public class GraphQLWebAutoConfiguration {
 
   @Bean("graphqlAsyncTaskExecutor")
   @ConditionalOnMissingBean(name = "graphqlAsyncTaskExecutor")
+  @ConditionalOnProperty(prefix = "graphql.servlet.async", name = "enabled", havingValue = "true")
   public Executor threadPoolTaskExecutor() {
-    if (isAsyncModeEnabled()) {
-      ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-      executor.setCorePoolSize(asyncServletProperties.getThreads().getMin());
-      executor.setMaxPoolSize(asyncServletProperties.getThreads().getMax());
-      executor.setThreadNamePrefix(asyncServletProperties.getThreads().getNamePrefix());
-      executor.initialize();
-      return executor;
-    }
-    return null;
-  }
-
-  private boolean isAsyncModeEnabled() {
-    return graphQLServletProperties.getAsyncModeEnabled() != null
-        ? graphQLServletProperties.getAsyncModeEnabled()
-        : asyncServletProperties.isEnabled();
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(asyncServletProperties.getThreads().getMin());
+    executor.setMaxPoolSize(asyncServletProperties.getThreads().getMax());
+    executor.setThreadNamePrefix(asyncServletProperties.getThreads().getNamePrefix());
+    executor.initialize();
+    return executor;
   }
 
   @Bean
@@ -370,16 +359,10 @@ public class GraphQLWebAutoConfiguration {
       @Autowired(required = false) MultipartConfigElement multipartConfigElement) {
     ServletRegistrationBean<AbstractGraphQLHttpServlet> registration =
         new ServletRegistrationBean<>(servlet, graphQLServletProperties.getServletMapping());
-    if (multipartConfigElement != null) {
-      registration.setMultipartConfig(multipartConfigElement);
-    } else {
-      registration.setMultipartConfig(new MultipartConfigElement(""));
-    }
-    if (graphQLServletProperties.getAsyncModeEnabled() != null) {
-      registration.setAsyncSupported(graphQLServletProperties.getAsyncModeEnabled());
-    } else {
-      registration.setAsyncSupported(asyncServletProperties.isEnabled());
-    }
+    registration.setMultipartConfig(
+        Objects.requireNonNullElseGet(
+            multipartConfigElement, () -> new MultipartConfigElement("")));
+    registration.setAsyncSupported(asyncServletProperties.isEnabled());
     return registration;
   }
 }

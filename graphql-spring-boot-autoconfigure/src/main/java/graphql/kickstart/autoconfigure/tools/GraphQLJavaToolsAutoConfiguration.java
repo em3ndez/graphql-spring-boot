@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -35,12 +36,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /** @author Andrew Potter */
 @Slf4j
-@Configuration
+@AutoConfiguration
 @ConditionalOnClass(SchemaParser.class)
 @ConditionalOnProperty(
     value = "graphql.schema-strategy",
@@ -52,8 +53,14 @@ public class GraphQLJavaToolsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public SchemaStringProvider schemaStringProvider(GraphQLToolsProperties props) {
-    return new ClasspathResourceSchemaStringProvider(props.getSchemaLocationPattern());
+  public SchemaStringProvider schemaStringProvider(
+      ApplicationContext applicationContext,
+      GraphQLToolsProperties props
+  ) {
+    return new ClasspathResourceSchemaStringProvider(
+        applicationContext,
+        props.getSchemaLocationPattern()
+    );
   }
 
   @Bean
